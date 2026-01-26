@@ -1,13 +1,8 @@
 /**
- * Chat Service - Handles AI response generation
+ * Chat Service - Handles AI response generation and conversation management
  * 
  * This module contains the getAIResponse function that returns AI responses.
  * Currently returns mocked responses, but can be easily replaced with a real API call.
- * 
- * To integrate with a real LLM API later:
- * 1. Replace the mock implementation with actual API call
- * 2. Add your API key handling (preferably via environment variables)
- * 3. Handle streaming responses if needed
  */
 
 export interface ChatMessage {
@@ -16,28 +11,16 @@ export interface ChatMessage {
   id: string;
 }
 
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 /**
  * Generates an AI response for the given user message.
- * 
- * @param message - The user's input message
- * @returns Promise<string> - The AI's response text
- * 
- * TODO: Replace this mock implementation with real API call
- * Example future implementation:
- * 
- * const response = await fetch('YOUR_API_ENDPOINT', {
- *   method: 'POST',
- *   headers: {
- *     'Content-Type': 'application/json',
- *     'Authorization': `Bearer ${API_KEY}`,
- *   },
- *   body: JSON.stringify({
- *     model: 'your-model-name',
- *     messages: [{ role: 'user', content: message }],
- *   }),
- * });
- * const data = await response.json();
- * return data.choices[0].message.content;
  */
 export async function getAIResponse(message: string): Promise<string> {
   // Simulate network delay (1-2 seconds)
@@ -52,7 +35,6 @@ export async function getAIResponse(message: string): Promise<string> {
     "Great question! Once connected to a real LLM, I'll provide much more helpful responses.",
   ];
 
-  // Return a varied response based on message length for demo purposes
   const index = message.length % mockResponses.length;
   return mockResponses[index];
 }
@@ -62,4 +44,22 @@ export async function getAIResponse(message: string): Promise<string> {
  */
 export function generateMessageId(): string {
   return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Generates a unique ID for conversations
+ */
+export function generateConversationId(): string {
+  return `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Generates a title from the first message
+ */
+export function generateConversationTitle(firstMessage: string): string {
+  const maxLength = 30;
+  if (firstMessage.length <= maxLength) {
+    return firstMessage;
+  }
+  return firstMessage.substring(0, maxLength).trim() + "...";
 }
