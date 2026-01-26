@@ -3,6 +3,7 @@ import ChatHeader from "./ChatHeader";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import TypingIndicator from "./TypingIndicator";
+import { useChatHistory } from "@/hooks/useChatHistory";
 import {
   ChatMessage as ChatMessageType,
   getAIResponse,
@@ -11,10 +12,10 @@ import {
 
 /**
  * ChatContainer - Main chat interface component
- * Manages chat state and coordinates message flow
+ * Manages chat state with localStorage persistence
  */
 const ChatContainer = () => {
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const { messages, addMessage, clearHistory } = useChatHistory();
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +42,7 @@ const ChatContainer = () => {
       role: "user",
       content,
     };
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
 
     // Show typing indicator
     setIsTyping(true);
@@ -56,7 +57,7 @@ const ChatContainer = () => {
         role: "assistant",
         content: response,
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage(assistantMessage);
     } catch (error) {
       // Handle error gracefully
       const errorMessage: ChatMessageType = {
@@ -64,7 +65,7 @@ const ChatContainer = () => {
         role: "assistant",
         content: "Sorry, I encountered an error. Please try again.",
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      addMessage(errorMessage);
     } finally {
       setIsTyping(false);
     }
@@ -73,7 +74,7 @@ const ChatContainer = () => {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <ChatHeader />
+      <ChatHeader onClearChat={clearHistory} hasMessages={messages.length > 0} />
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto chat-scrollbar">
@@ -101,7 +102,7 @@ const ChatContainer = () => {
               </h2>
               <p className="text-muted-foreground text-sm max-w-md">
                 Send a message to begin chatting with the AI assistant. Your
-                conversation will appear here.
+                conversation will be saved automatically.
               </p>
             </div>
           )}

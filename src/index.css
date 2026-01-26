@@ -2,10 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Chat Design System - Dark Mode */
+/* AI Chat Design System - Light & Dark Modes */
 
 @layer base {
+  /* Light Mode (default) */
   :root {
+    --background: 210 20% 98%;
+    --foreground: 220 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    --primary: 174 72% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 20% 20%;
+
+    --muted: 210 20% 92%;
+    --muted-foreground: 215 15% 40%;
+
+    --accent: 174 72% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 92%;
+    --ring: 174 72% 40%;
+
+    --radius: 0.75rem;
+
+    /* Custom chat tokens - Light */
+    --chat-user-bg: 174 72% 40%;
+    --chat-user-fg: 0 0% 100%;
+    --chat-assistant-bg: 210 20% 94%;
+    --chat-assistant-fg: 220 20% 15%;
+    --chat-input-bg: 0 0% 100%;
+    --chat-header-bg: 0 0% 100%;
+
+    --sidebar-background: 210 20% 96%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 174 72% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 92%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 174 72% 40%;
+  }
+
+  /* Dark Mode */
+  .dark {
     --background: 220 20% 10%;
     --foreground: 210 20% 95%;
 
@@ -34,9 +85,7 @@
     --input: 220 14% 22%;
     --ring: 174 72% 46%;
 
-    --radius: 0.75rem;
-
-    /* Custom chat tokens */
+    /* Custom chat tokens - Dark */
     --chat-user-bg: 174 72% 46%;
     --chat-user-fg: 220 20% 10%;
     --chat-assistant-bg: 220 16% 16%;
@@ -57,11 +106,16 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-200;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+  }
+
+  /* Smooth theme transitions */
+  html {
+    @apply transition-colors duration-300;
   }
 
   /* Custom scrollbar for chat */
