@@ -116,6 +116,34 @@ export function useConversations() {
     [activeConversationId]
   );
 
+  // Update the last message in the active conversation (for streaming)
+  const updateLastMessage = useCallback(
+    (content: string) => {
+      if (!activeConversationId) return;
+
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === activeConversationId && conv.messages.length > 0) {
+            const updatedMessages = [...conv.messages];
+            const lastIndex = updatedMessages.length - 1;
+            updatedMessages[lastIndex] = {
+              ...updatedMessages[lastIndex],
+              content,
+            };
+
+            return {
+              ...conv,
+              messages: updatedMessages,
+              updatedAt: Date.now(),
+            };
+          }
+          return conv;
+        })
+      );
+    },
+    [activeConversationId]
+  );
+
   // Switch to a different conversation
   const switchConversation = useCallback((conversationId: string) => {
     setActiveConversationId(conversationId);
@@ -155,6 +183,7 @@ export function useConversations() {
     activeConversationId,
     createConversation,
     addMessage,
+    updateLastMessage,
     switchConversation,
     deleteConversation,
     clearAllConversations,

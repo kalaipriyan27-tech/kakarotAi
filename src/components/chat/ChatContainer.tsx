@@ -7,9 +7,10 @@ import TypingIndicator from "./TypingIndicator";
 import { useConversations } from "@/hooks/useConversations";
 import {
   ChatMessage as ChatMessageType,
-  getAIResponse,
+  streamChat,
   generateMessageId,
 } from "@/lib/chatService";
+import { toast } from "sonner";
 
 /**
  * ChatContainer - Main chat interface component
@@ -22,6 +23,7 @@ const ChatContainer = () => {
     activeConversationId,
     createConversation,
     addMessage,
+    updateLastMessage,
     switchConversation,
     deleteConversation,
     clearAllConversations,
@@ -44,7 +46,7 @@ const ChatContainer = () => {
   }, [messages, isTyping]);
 
   /**
-   * Handles sending a new message
+   * Handles sending a new message with streaming response
    */
   const handleSendMessage = async (content: string) => {
     // Add user message
@@ -55,31 +57,42 @@ const ChatContainer = () => {
     };
     addMessage(userMessage);
 
+    // Create placeholder assistant message
+    const assistantMessageId = generateMessageId();
+    const assistantMessage: ChatMessageType = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+    };
+    addMessage(assistantMessage);
+
     // Show typing indicator
     setIsTyping(true);
 
-    try {
-      // Get AI response (mocked for now)
-      const response = await getAIResponse(content);
+    // Build messages array for API (without IDs)
+    const apiMessages = [...messages, userMessage].map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    }));
 
-      // Add AI response
-      const assistantMessage: ChatMessageType = {
-        id: generateMessageId(),
-        role: "assistant",
-        content: response,
-      };
-      addMessage(assistantMessage);
-    } catch (error) {
-      // Handle error gracefully
-      const errorMessage: ChatMessageType = {
-        id: generateMessageId(),
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-      };
-      addMessage(errorMessage);
-    } finally {
-      setIsTyping(false);
-    }
+    let streamedContent = "";
+
+    await streamChat({
+      messages: apiMessages,
+      onDelta: (delta) => {
+        streamedContent += delta;
+        updateLastMessage(streamedContent);
+      },
+      onDone: () => {
+        setIsTyping(false);
+      },
+      onError: (error) => {
+        setIsTyping(false);
+        toast.error(error.message || "Failed to get AI response");
+        // Update the message with error
+        updateLastMessage("Sorry, I encountered an error. Please try again.");
+      },
+    });
   };
 
   const handleNewChat = () => {
