@@ -63,3 +63,57 @@ Build the app and deploy the static output (or your preferred hosting platform).
 Yes, you can!
 
 How you do it depends on your hosting provider (Vercel/Netlify/Cloudflare Pages/etc.).
+
+
+
+##How To Run This React Project on Local
+
+# React Project – Run Locally
+
+This document explains how to run this React project on your local machine.
+
+## Prerequisites
+
+- Node.js (v16 or higher recommended)
+- npm (comes with Node.js) or yarn
+
+Check installation:
+node -v
+npm -v
+
+## Clone the Repository
+
+git clone <your-repository-url>
+cd <project-folder-name>
+
+## Install Dependencies
+
+Using npm:
+npm install
+
+Or using yarn:
+yarn install
+
+## Run the Project
+
+Using npm:
+npm start
+
+Or using yarn:
+yarn start
+
+## Open in Browser
+
+http://localhost:3000
+
+The app will auto-reload when you make changes.
+
+## Stop the Server
+
+Press Ctrl + C in the terminal.
+
+## Build for Production (Optional)
+
+npm run build
+
+Production files will be generated in the build/ folder.
