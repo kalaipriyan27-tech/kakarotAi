@@ -1,4 +1,18 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+type ServeHandler = (req: Request) => Response | Promise<Response>;
+
+// Use the built-in Deno runtime serve in Supabase Edge Functions without requiring
+// TypeScript URL-import resolution in the editor.
+const serve = (handler: ServeHandler) => {
+  const denoServe: ((handler: ServeHandler) => unknown) | undefined = (
+    globalThis as unknown as { Deno?: { serve?: (handler: ServeHandler) => unknown } }
+  )?.Deno?.serve;
+
+  if (!denoServe) {
+    throw new Error("Deno.serve is not available in this runtime.");
+  }
+
+  return denoServe(handler);
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +38,11 @@ serve(async (req) => {
   }
 
   try {
-    const rawKey = Deno.env.get("LLM_API_KEY");
+    const denoEnvGet: ((key: string) => string | undefined) | undefined = (
+      globalThis as unknown as { Deno?: { env?: { get?: (key: string) => string | undefined } } }
+    )?.Deno?.env?.get;
+
+    const rawKey = denoEnvGet?.("LLM_API_KEY");
     if (!rawKey) {
       console.error("LLM_API_KEY is not configured");
       return new Response(
@@ -73,8 +91,8 @@ serve(async (req) => {
         Authorization: `Bearer ${LLM_API_KEY}`,
         "Content-Type": "application/json",
         // OpenRouter-specific headers (ignored by other providers)
-        "HTTP-Referer": Deno.env.get("SUPABASE_URL") || "",
-        "X-Title": "Lovable Chat",
+        "HTTP-Referer": denoEnvGet?.("SUPABASE_URL") || "",
+        "X-Title": "Kakarot Ai",
       },
       body: JSON.stringify({
         model: selectedModel,

@@ -22,7 +22,7 @@ const ChatHeader = ({ onClearChat, hasMessages }: ChatHeaderProps) => {
             <Bot className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">AI Chat</h1>
+            <h1 className="text-lg font-semibold text-foreground">Kakarot AI</h1>
             <p className="text-xs text-muted-foreground">
               Your intelligent assistant
             </p>
