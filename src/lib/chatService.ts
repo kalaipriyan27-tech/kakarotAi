@@ -19,7 +19,7 @@ export interface Conversation {
 }
 
 // Configuration - change these to use different models/providers
-export const DEFAULT_MODEL = "Qwen/Qwen2.5-7B-Instruct";
+export const DEFAULT_MODEL = "deepseek-ai/DeepSeek-R1-0528";
 export const DEFAULT_BASE_URL = "https://router.huggingface.co/v1/chat/completions";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
