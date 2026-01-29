@@ -1,85 +1,50 @@
 
-
-# Plan: Custom LLM Edge Function with Your Own API Key
+# Switch LLM Model to DeepSeek
 
 ## Overview
-Create a secure Supabase edge function that connects to your preferred LLM provider (OpenRouter, OpenAI, etc.) using your own API key and model selection.
+Change the default LLM model from Qwen/Qwen2.5-7B-Instruct to a DeepSeek model. Since you're using HuggingFace Router, we'll use DeepSeek models available through that service.
 
-## What You'll Get
-- A backend edge function that keeps your API key secure (never exposed to browser)
-- Ability to choose any model from your provider
-- Streaming responses for real-time AI text generation
-- Easy model switching without code changes
+## Changes Required
 
----
+### 1. Update Frontend Configuration
+**File:** `src/lib/chatService.ts`
+- Change `DEFAULT_MODEL` from `"Qwen/Qwen2.5-7B-Instruct"` to `"deepseek-ai/DeepSeek-R1-0528"`
+- The base URL stays the same (HuggingFace Router)
 
-## Implementation Steps
+### 2. Update Edge Function Default
+**File:** `supabase/functions/chat/index.ts`
+- Change the fallback model from `"Qwen/Qwen2.5-7B-Instruct"` to `"deepseek-ai/DeepSeek-R1-0528"`
 
-### Step 1: Add Your API Key as a Secret
-Before coding, you'll be prompted to securely add your API key:
-- **Secret name**: `LLM_API_KEY`
-- **Value**: Your OpenRouter, OpenAI, or other provider's API key
-
-### Step 2: Create Edge Function
-Create `supabase/functions/chat/index.ts`:
-- Accepts messages array and model parameter from frontend
-- Reads `LLM_API_KEY` from environment secrets
-- Calls your chosen LLM provider's API
-- Streams response back to the client
-- Handles errors gracefully (rate limits, auth failures)
-
-### Step 3: Configure Supabase
-Create `supabase/config.toml`:
-- Register the chat function
-- Set `verify_jwt = false` for public access (or add auth if needed)
-
-### Step 4: Update Frontend Chat Service
-Modify `src/lib/chatService.ts`:
-- Replace mocked `getAIResponse` with real edge function call
-- Add streaming support with token-by-token rendering
-- Pass model parameter (configurable)
-
-### Step 5: Update Chat Container
-Modify `src/components/chat/ChatContainer.tsx`:
-- Integrate streaming response handling
-- Update assistant message progressively as tokens arrive
-
----
+## Available DeepSeek Models on HuggingFace
+- `deepseek-ai/DeepSeek-R1-0528` - Latest reasoning model
+- `deepseek-ai/DeepSeek-V3-0324` - Latest general model
+- `deepseek-ai/DeepSeek-R1` - Reasoning-focused model
+- `deepseek-ai/DeepSeek-V2.5` - Previous generation
 
 ## Technical Details
 
-### Edge Function API
+The changes are minimal since the architecture already supports model switching:
+
 ```text
-POST /functions/v1/chat
-Body: { messages: [...], model: "openai/gpt-4o" }
-Response: SSE stream of tokens
+┌─────────────────────────────────────────────────────────┐
+│  chatService.ts                                         │
+│  DEFAULT_MODEL = "deepseek-ai/DeepSeek-R1-0528"        │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  Edge Function (chat/index.ts)                          │
+│  Forwards model to HuggingFace Router                   │
+│  fallback: "deepseek-ai/DeepSeek-R1-0528"              │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  HuggingFace Router API                                 │
+│  https://router.huggingface.co/v1/chat/completions     │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### Supported Providers
-The edge function will be configured for OpenRouter format (compatible with most providers):
-- OpenRouter: `https://openrouter.ai/api/v1/chat/completions`
-- OpenAI: `https://api.openai.com/v1/chat/completions`
-
-You can specify which provider's base URL to use.
-
-### Default Model
-Will default to a common model (e.g., `openai/gpt-4o-mini`) but you can change it in the code or make it configurable via the UI later.
-
----
-
-## Files to Create/Modify
-
-| File | Action |
-|------|--------|
-| `supabase/config.toml` | Create - Register edge function |
-| `supabase/functions/chat/index.ts` | Create - Main edge function |
-| `src/lib/chatService.ts` | Modify - Call edge function with streaming |
-| `src/components/chat/ChatContainer.tsx` | Modify - Handle streaming responses |
-
----
-
-## Security Notes
-- Your API key is stored as an encrypted Supabase secret
-- Never exposed to the browser or frontend code
-- All API calls happen server-side in the edge function
-
+## Files to Modify
+1. `src/lib/chatService.ts` - Line 22
+2. `supabase/functions/chat/index.ts` - Line 65
