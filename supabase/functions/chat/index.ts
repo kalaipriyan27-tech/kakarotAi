@@ -62,7 +62,7 @@ serve(async (req) => {
     // Default to HuggingFace Router API, but allow custom base URL
     const apiUrl = baseUrl || "https://router.huggingface.co/v1/chat/completions";
     // Default model - can be changed to any model supported by your provider
-    const selectedModel = model || "Qwen/Qwen2.5-7B-Instruct";
+    const selectedModel = model || "deepseek-ai/DeepSeek-R1-0528";
 
     console.log(`Calling ${apiUrl} with model: ${selectedModel}`);
     console.log(`Messages count: ${messages.length}`);
