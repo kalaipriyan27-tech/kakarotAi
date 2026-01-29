@@ -24,8 +24,8 @@ serve(async (req) => {
   }
 
   try {
-    const LLM_API_KEY = Deno.env.get("LLM_API_KEY");
-    if (!LLM_API_KEY) {
+    const rawKey = Deno.env.get("LLM_API_KEY");
+    if (!rawKey) {
       console.error("LLM_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: "LLM_API_KEY is not configured" }),
@@ -35,6 +35,17 @@ serve(async (req) => {
         }
       );
     }
+
+    // Common misconfiguration: users paste keys with surrounding quotes or whitespace.
+    // Normalize without ever logging the key.
+    let LLM_API_KEY = rawKey.trim();
+    if (
+      (LLM_API_KEY.startsWith('"') && LLM_API_KEY.endsWith('"')) ||
+      (LLM_API_KEY.startsWith("'") && LLM_API_KEY.endsWith("'"))
+    ) {
+      LLM_API_KEY = LLM_API_KEY.slice(1, -1).trim();
+    }
+    console.log(`LLM_API_KEY loaded (length=${LLM_API_KEY.length})`);
 
     const { messages, model, baseUrl }: ChatRequest = await req.json();
 
@@ -82,6 +93,16 @@ serve(async (req) => {
       const errorText = await response.text();
       console.error(`LLM API error: ${response.status} - ${errorText}`);
 
+      // Try to surface provider message (safe, no secrets) for easier debugging.
+      let providerMessage: string | undefined;
+      try {
+        const parsed = JSON.parse(errorText);
+        providerMessage =
+          parsed?.error?.message || parsed?.message || parsed?.error || undefined;
+      } catch {
+        // ignore
+      }
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
@@ -94,7 +115,12 @@ serve(async (req) => {
 
       if (response.status === 401 || response.status === 403) {
         return new Response(
-          JSON.stringify({ error: "Invalid API key. Please check your LLM_API_KEY." }),
+          JSON.stringify({
+            error:
+              providerMessage
+                ? `LLM provider auth failed: ${providerMessage}`
+                : "Invalid API key. Please check your LLM_API_KEY.",
+          }),
           {
             status: 401,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
