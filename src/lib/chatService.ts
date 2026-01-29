@@ -19,8 +19,8 @@ export interface Conversation {
 }
 
 // Configuration - change these to use different models/providers
-export const DEFAULT_MODEL = "openai/gpt-4o-mini";
-export const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1/chat/completions";
+export const DEFAULT_MODEL = "Qwen/Qwen2.5-7B-Instruct";
+export const DEFAULT_BASE_URL = "https://router.huggingface.co/v1/chat/completions";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
