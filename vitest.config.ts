@@ -4,6 +4,19 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  base: "/kakarotAi/",
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: "index.js",
+        chunkFileNames: "chunk-[name].js",
+        assetFileNames: "assets/[name].[ext]",
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     globals: true,
